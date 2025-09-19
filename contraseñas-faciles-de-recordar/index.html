@@ -1,1 +1,167 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="google-site-verification" content="hVU388zqlMidCPL-EXjpubzda8vPGUSFq7dGe6JIZoQ" />
+  <meta name="description" content="Crea contraseñas únicas y fáciles de recordar en segundos. Protege tus cuentas sin olvidar tu contraseña.">
+  <title>Generador de contraseñas fáciles de recordar – Seguro y simple</title>
+  <style>
+    :root{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f172a;color:#e6eef8;margin:0;padding:24px}
+    .card{background:#0b1220;padding:20px;border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,.6);width:100%;max-width:760px}
+    h1{margin:0 0 8px;font-size:18px}
+    .row{display:flex;gap:10px;align-items:center;margin:10px 0}
+    select,input,button{background:#071028;border:1px solid rgba(255,255,255,.06);color:inherit;padding:8px 10px;border-radius:8px}
+    button{cursor:pointer}
+    .out{font-family:monospace;background:#071828;padding:12px;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
+    small{color:#98a0b3}
+    label{font-size:13px}
+    .columns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .sm{font-size:13px;padding:6px 8px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Generador de contraseñas fáciles de recordar</h1>
+    <small>Contraseñas seguras y fáciles de recordar. Ej: <strong>Perro-Rojo!1999</strong></small>
 
+    <div class="row columns" style="margin-top:12px">
+      <div>
+        <label>Tipo de patrón</label>
+        <select id="pattern" class="sm">
+          <option value="word-color-symbol-year">Palabra-Color-Símbolo-Año</option>
+          <option value="adj-noun-symbol-year">Adj-Nombre-Símbolo-Año</option>
+          <option value="color-animal-number">Color-Animal-Número</option>
+        </select>
+      </div>
+      <div>
+        <label>Separador</label>
+        <input id="sep" class="sm" value="-" />
+      </div>
+    </div>
+
+    <div class="row">
+      <label style="width:160px">Mayúscula inicial</label>
+      <input type="checkbox" id="cap" checked />
+      <label style="margin-left:12px">Incluir símbolo</label>
+      <input type="checkbox" id="symbol" checked />
+      <label style="margin-left:12px">Añadir año</label>
+      <input type="checkbox" id="year" checked />
+    </div>
+
+    <div class="row">
+      <label style="width:160px">Rango año</label>
+      <input id="yearFrom" class="sm" type="number" value="1950" style="width:100px" />
+      <input id="yearTo" class="sm" type="number" value="2025" style="width:100px;margin-left:6px" />
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <button id="generate" class="sm">Generar</button>
+      <button id="copy" class="sm">Copiar</button>
+      <button id="shuffle" class="sm">Otra</button>
+      <div style="margin-left:auto;text-align:right">
+        <small id="strength">Fuerza: —</small>
+      </div>
+    </div>
+
+    <div class="row out" style="margin-top:12px">
+      <div id="output" style="flex:1;word-break:break-word">—</div>
+      <button id="quick" title="Seleccionar y copiar" style="margin-left:12px">Seleccionar</button>
+    </div>
+
+    <hr style="border-color:rgba(255,255,255,.04);margin:14px 0" />
+    <small>Palabras enlistadas:</small>
+    <div style="margin-top:8px;font-size:13px;color:#9fb0d6">
+      <div>Palabras: perro, prostibulo gato, casa, luna, sol, rio, bosque, estrella</div>
+      <div>Colores: rojo, azul, verde, negro, blanco, dorado, gris</div>
+      <div>Adjetivos: rapido, feliz, sabio, feroz, claro</div>
+    </div>
+
+  </div>
+
+<script>
+// Listas - fáciles de modificar
+const WORDS = ['perro','gato','casa','luna','sol','rio','bosque','estrella','barco','puerta','plaza','cafe'];
+const COLORS = ['rojo','azul','verde','negro','blanco','dorado','gris','rosa','amarillo'];
+const ADJ = ['rapido','feliz','sabio','feroz','claro','silencioso','valiente'];
+const ANIMALS = ['lobo','caballo','zorro','gallo','tigre','elefante','perico'];
+const SYMBOLS = ['!','@','#','$','%','&','*','?'];
+
+function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+function gen(){
+  const pattern = document.getElementById('pattern').value;
+  const sep = document.getElementById('sep').value || '-';
+  const useCap = document.getElementById('cap').checked;
+  const useSymbol = document.getElementById('symbol').checked;
+  const useYear = document.getElementById('year').checked;
+  const yFrom = parseInt(document.getElementById('yearFrom').value)||1950;
+  const yTo = parseInt(document.getElementById('yearTo').value)||2025;
+  let parts = [];
+
+  if(pattern === 'word-color-symbol-year'){
+    parts.push(rand(WORDS));
+    parts.push(rand(COLORS));
+    if(useSymbol) parts.push(rand(SYMBOLS));
+    if(useYear) parts.push(String(randInt(Math.min(yFrom,yTo), Math.max(yFrom,yTo))));
+  }
+  if(pattern === 'adj-noun-symbol-year'){
+    parts.push(rand(ADJ));
+    parts.push(rand(WORDS));
+    if(useSymbol) parts.push(rand(SYMBOLS));
+    if(useYear) parts.push(String(randInt(Math.min(yFrom,yTo), Math.max(yFrom,yTo))));
+  }
+  if(pattern === 'color-animal-number'){
+    parts.push(rand(COLORS));
+    parts.push(rand(ANIMALS));
+    parts.push(String(randInt(10,99)));
+  }
+
+  // apply capitalization option to first word
+  if(useCap && parts.length>0){ parts[0] = cap(parts[0]); }
+
+  // join with separator but keep symbols attached if they are single-char symbol items
+  const joined = parts.map((p,i)=> (SYMBOLS.includes(p) ? p : p)).join(sep);
+  return joined;
+}
+
+function estimateStrength(pw){
+  // simple estimator: length + variety
+  const len = pw.length;
+  const variety = (/[A-Z]/.test(pw))+(/[a-z]/.test(pw))+(/[0-9]/.test(pw))+(/[^\w\-]/.test(pw));
+  const score = Math.min(100, Math.round((len*3 + variety*20)));
+  if(score<30) return 'Baja';
+  if(score<60) return 'Media';
+  return 'Alta';
+}
+
+const out = document.getElementById('output');
+const strength = document.getElementById('strength');
+
+function doGenerate(){ const p=gen(); out.textContent=p; strength.textContent='Fuerza: '+estimateStrength(p); }
+
+document.getElementById('generate').addEventListener('click', doGenerate);
+document.getElementById('shuffle').addEventListener('click', doGenerate);
+
+document.getElementById('copy').addEventListener('click', async ()=>{
+  try{
+    await navigator.clipboard.writeText(out.textContent);
+    document.getElementById('copy').textContent='Copiado';
+    setTimeout(()=>document.getElementById('copy').textContent='Copiar',900);
+  }catch(e){ alert('No se pudo copiar. Selecciona y copia manualmente.'); }
+});
+
+document.getElementById('quick').addEventListener('click', async ()=>{
+  try{ const t=out.textContent; navigator.clipboard.writeText(t); alert('Contraseña copiada al portapapeles'); }
+  catch(e){ try{ const range = document.createRange(); range.selectNodeContents(out); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); }
+  catch(e){} }
+});
+
+// generate one at load
+window.addEventListener('load', doGenerate);
+</script>
+</body>
+</html>
